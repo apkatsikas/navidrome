@@ -77,9 +77,8 @@ func (m *mockMpvipc) Set(property string, value interface{}) error {
 
 // Get simulates getting a property
 func (m *mockMpvipc) Get(property string) (interface{}, error) {
-	m.Called()
-	// Implement your mock behavior for getting a property
-	return nil, nil
+	args := m.Called(property)
+	return args.Get(0), args.Error(1)
 }
 
 // Close simulates closing the connection
@@ -102,7 +101,8 @@ func TestThingz(t *testing.T) {
 	ctx := log.NewContext(context.Background())
 	ps := &mockPlaybackServer{}
 	mockMpv := &mockMpvipc{}
-	mockMpv.On("Get").Return(true, nil)
+	mockMpv.On("Get", "time-pos").Return(0, nil)
+	mockMpv.On("Get", "pause").Return(false, nil)
 
 	mediaIds := []string{"1234", "5678", "90"}
 	device := NewPlaybackDevice(
@@ -128,7 +128,9 @@ func TestThingz(t *testing.T) {
 		t.Error(err)
 	}
 
-	fmt.Println(startStatus.Playing)
+	if !startStatus.Playing {
+		t.Error("should have been playing")
+	}
 
-	fmt.Println(mockMpv.AssertExpectations(t))
+	mockMpv.AssertExpectations(t)
 }
