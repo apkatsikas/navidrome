@@ -45,6 +45,7 @@ func (m *mockPlaybackServer) GetMediaFile(id string) (*model.MediaFile, error) {
 }
 
 type mockMpvipc struct {
+	mock.Mock
 }
 
 // Open simulates opening a connection
@@ -76,6 +77,7 @@ func (m *mockMpvipc) Set(property string, value interface{}) error {
 
 // Get simulates getting a property
 func (m *mockMpvipc) Get(property string) (interface{}, error) {
+	m.Called()
 	// Implement your mock behavior for getting a property
 	return nil, nil
 }
@@ -99,6 +101,8 @@ func TestThingz(t *testing.T) {
 	// SHould I be using log here?
 	ctx := log.NewContext(context.Background())
 	ps := &mockPlaybackServer{}
+	mockMpv := &mockMpvipc{}
+	mockMpv.On("Get").Return(true, nil)
 
 	mediaIds := []string{"1234", "5678", "90"}
 	device := NewPlaybackDevice(
@@ -107,7 +111,7 @@ func TestThingz(t *testing.T) {
 		"device name",
 		func(playbackDoneChannel chan bool, deviceName string, mf model.MediaFile) (*mpv.MpvTrack, error) {
 			return &mpv.MpvTrack{
-				Conn: &mockMpvipc{},
+				Conn: mockMpv,
 			}, nil
 		},
 	)
@@ -117,12 +121,14 @@ func TestThingz(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	fmt.Println(setStatus.Playing)
+
 	startStatus, err := device.Start(ctx)
 	if err != nil {
 		t.Error(err)
 	}
 
-	fmt.Println(setStatus)
-	fmt.Println(startStatus)
-	fmt.Println(ps.Calls)
+	fmt.Println(startStatus.Playing)
+
+	fmt.Println(mockMpv.AssertExpectations(t))
 }
