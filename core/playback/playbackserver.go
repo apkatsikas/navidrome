@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	"github.com/navidrome/navidrome/conf"
+	"github.com/navidrome/navidrome/core/playback/mpv"
 	"github.com/navidrome/navidrome/db"
 	"github.com/navidrome/navidrome/log"
 	"github.com/navidrome/navidrome/model"
@@ -70,7 +71,7 @@ func (ps *playbackServer) initDeviceStatus(devices []conf.AudioDeviceDefinition,
 	if defaultDevice == "" {
 		// if there are no devices given and no default device, we create a sythetic device named "auto"
 		if len(devices) == 0 {
-			pbDevices[0] = *NewPlaybackDevice(ps, "auto", "auto")
+			pbDevices[0] = *NewPlaybackDevice(ps, "auto", "auto", mpv.NewTrack)
 		}
 
 		// if there is but only one entry and no default given, just use that.
@@ -78,7 +79,7 @@ func (ps *playbackServer) initDeviceStatus(devices []conf.AudioDeviceDefinition,
 			if len(devices[0]) != 2 {
 				return []playbackDevice{}, fmt.Errorf("audio device definition ought to contain 2 fields, found: %d ", len(devices[0]))
 			}
-			pbDevices[0] = *NewPlaybackDevice(ps, devices[0][0], devices[0][1])
+			pbDevices[0] = *NewPlaybackDevice(ps, devices[0][0], devices[0][1], mpv.NewTrack)
 		}
 
 		if len(devices) > 1 {
@@ -94,7 +95,7 @@ func (ps *playbackServer) initDeviceStatus(devices []conf.AudioDeviceDefinition,
 			return []playbackDevice{}, fmt.Errorf("audio device definition ought to contain 2 fields, found: %d ", len(audioDevice))
 		}
 
-		pbDevices[idx] = *NewPlaybackDevice(ps, audioDevice[0], audioDevice[1])
+		pbDevices[idx] = *NewPlaybackDevice(ps, audioDevice[0], audioDevice[1], mpv.NewTrack)
 
 		if audioDevice[0] == defaultDevice {
 			pbDevices[idx].Default = true
