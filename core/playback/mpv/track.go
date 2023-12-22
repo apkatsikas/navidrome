@@ -18,10 +18,22 @@ import (
 type MpvTrack struct {
 	MediaFile     model.MediaFile
 	PlaybackDone  chan bool
-	Conn          *mpvipc.Connection
+	Conn          Impvipc
 	IPCSocketName string
 	Exe           *Executor
 	CloseCalled   bool
+}
+
+type Impvipc interface {
+	Open() error
+	ListenForEvents(events chan<- *mpvipc.Event, stop <-chan struct{})
+	NewEventListener() (chan *mpvipc.Event, chan struct{})
+	Call(arguments ...interface{}) (interface{}, error)
+	Set(property string, value interface{}) error
+	Get(property string) (interface{}, error)
+	Close() error
+	IsClosed() bool
+	WaitUntilClosed()
 }
 
 func NewTrack(playbackDoneChannel chan bool, deviceName string, mf model.MediaFile) (*MpvTrack, error) {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/dexterlb/mpvipc"
 	"github.com/navidrome/navidrome/core/playback/mpv"
 	"github.com/navidrome/navidrome/log"
 	"github.com/navidrome/navidrome/model"
@@ -43,6 +44,57 @@ func (m *mockPlaybackServer) GetMediaFile(id string) (*model.MediaFile, error) {
 	return &model.MediaFile{}, nil
 }
 
+type mockMpvipc struct {
+}
+
+// Open simulates opening a connection
+func (m *mockMpvipc) Open() error {
+	return nil
+}
+
+// ListenForEvents simulates listening for events
+func (m *mockMpvipc) ListenForEvents(events chan<- *mpvipc.Event, stop <-chan struct{}) {
+
+}
+
+// NewEventListener simulates creating a new event listener
+func (m *mockMpvipc) NewEventListener() (chan *mpvipc.Event, chan struct{}) {
+	return nil, nil
+}
+
+// Call simulates calling an arbitrary command
+func (m *mockMpvipc) Call(arguments ...interface{}) (interface{}, error) {
+	// Implement your mock behavior for command execution
+	return nil, nil
+}
+
+// Set simulates setting a property
+func (m *mockMpvipc) Set(property string, value interface{}) error {
+	// Implement your mock behavior for setting a property
+	return nil
+}
+
+// Get simulates getting a property
+func (m *mockMpvipc) Get(property string) (interface{}, error) {
+	// Implement your mock behavior for getting a property
+	return nil, nil
+}
+
+// Close simulates closing the connection
+func (m *mockMpvipc) Close() error {
+	return nil
+}
+
+// IsClosed simulates checking if the connection is closed
+func (m *mockMpvipc) IsClosed() bool {
+	return false
+}
+
+// WaitUntilClosed simulates waiting until the connection is closed
+func (m *mockMpvipc) WaitUntilClosed() {
+
+}
+
 func TestThingz(t *testing.T) {
 	// SHould I be using log here?
 	ctx := log.NewContext(context.Background())
@@ -55,7 +107,7 @@ func TestThingz(t *testing.T) {
 		"device name",
 		func(playbackDoneChannel chan bool, deviceName string, mf model.MediaFile) (*mpv.MpvTrack, error) {
 			return &mpv.MpvTrack{
-				//
+				Conn: &mockMpvipc{},
 			}, nil
 		},
 	)
