@@ -38,7 +38,14 @@ func Extract(files ...string) (map[string]Tags, error) {
 		p = extractors[consts.DefaultScannerExtractor]
 	}
 
+	startTime := time.Now()
 	extractedTags, err := p.Parse(files...)
+	endTime := time.Now()
+
+	duration := endTime.Sub(startTime)
+
+	// Print the duration
+	fmt.Printf("using %s parsing took took %s\n", conf.Server.Scanner.Extractor, duration)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +61,6 @@ func Extract(files ...string) (map[string]Tags, error) {
 		tags = tags.Map(p.CustomMappings())
 		result[filePath] = NewTag(filePath, fileInfo, tags)
 	}
-
 	return result, nil
 }
 
